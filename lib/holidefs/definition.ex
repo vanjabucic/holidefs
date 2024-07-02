@@ -56,7 +56,7 @@ defmodule Holidefs.Definition do
         }
 
       {:error, _} ->
-        Logger.warn("Definition file for #{code} not found.")
+        Logger.warning("Definition file for #{code} not found.")
         nil
     end
   end

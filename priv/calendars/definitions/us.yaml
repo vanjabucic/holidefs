@@ -1,6 +1,6 @@
 # United States holiday definitions for the Ruby Holiday gem.
 #
-# Updated: 2008-11-24.
+# Updated: 2024-11-24.
 #
 # Changed: 2017-06-15 to 2017-06-20
 # - Add missing holiday information for a whole bunch of US states
@@ -35,7 +35,6 @@
 # - https://en.wikipedia.org/wiki/Washington%27s_Birthday
 # - https://en.wikipedia.org/wiki/Shrove_Tuesday
 # - https://en.wikipedia.org/wiki/Town_meeting#Vermont
-# - https://en.wikipedia.org/wiki/Casimir_Pulaski_Day
 # - https://en.wikipedia.org/wiki/Seward%27s_Day
 # - https://en.wikipedia.org/wiki/Emancipation_Day
 # - https://en.wikipedia.org/wiki/Patriots%27_Day
@@ -65,8 +64,9 @@
 # - http://www.kleiner-kalender.de/event/rosch-ha-schana/0651c.html
 # - http://www.kaldix.com/united-states/calendar/virginia/holidays/independence-day/year-2017/
 # - https://publicholidays.us/independence-day/
-# - https://www.ca2.uscourts.gov/clerk/calendars/federal_holidays.html
+
 ---
+
 months:
   0:
   - name: Shrove Tuesday
@@ -126,10 +126,6 @@ months:
     regions: [us]
     wday: 1
   3:
-  - name: Casimir Pulaski Day # First Monday in March
-    regions: [us_il]
-    week: 1
-    wday: 1
   - name: Town Meeting Day # First Tuesday in March
     regions: [us_vt]
     week: 1
@@ -150,7 +146,7 @@ months:
     mday: 31
   4:
   - name: Emancipation Day
-    regions: [us_dc, us_ca]
+    regions: [us_dc]
     observed: to_weekday_if_weekend(date)
     mday: 16
   - name: Patriots' Day # Third Monday in April
@@ -197,6 +193,12 @@ months:
     regions: [us_hi]
     observed: to_weekday_if_weekend(date)
     mday: 11
+  - name: Juneteenth National Independence Day
+    regions: [us]
+    mday: 19
+    observed: to_weekday_if_weekend(date)
+    year_ranges:
+      from: 2021
   - name: Emancipation Day in Texas # fixed
     regions: [us_tx]
     mday: 19
@@ -211,7 +213,6 @@ months:
   - name: Independence Day # fixed
     regions: [us]
     mday: 4
-    observed: to_weekday_if_weekend(date)
   - name: Independence Day (Holiday)
     regions: [us_va]
     mday: 4
@@ -265,7 +266,7 @@ months:
     wday: 5
   11:
   - name: Election Day
-    regions: [us_de, us_hi, us_il, us_in, us_mt, us_nj, us_ny, us_pa, us_ri]
+    regions: [us_de, us_hi, us_in, us_mt, us_nj, us_ny, us_pa, us_ri]
     function: election_day(year)
   - name: Veterans Day
     regions: [us]
@@ -315,12 +316,12 @@ months:
 methods:
   christmas_eve_holiday:
     arguments: date
-    source: |
+    ruby: |
       beginning_of_month = Date.civil(date.year, date.month, 1)
       (date.saturday? || date.sunday?) ? date.downto(beginning_of_month).find {|d| d if d.wday == 5} : date
   rosh_hashanah:
     arguments: year
-    source: |
+    ruby: |
       rosh_hashanah_dates = {
           '2014' => Date.civil(2014, 9, 25),
           '2015' => Date.civil(2015, 9, 14),
@@ -333,7 +334,7 @@ methods:
       rosh_hashanah_dates[year.to_s]
   yom_kippur:
     arguments: year
-    source: |
+    ruby: |
       yom_kippur_dates = {
           '2014' => Date.civil(2014, 10, 4),
           '2015' => Date.civil(2015, 9, 23),
@@ -347,14 +348,14 @@ methods:
   georgia_state_holiday:
     # Monday before that holiday
     arguments: year, month
-    source: |
+    ruby: |
       beginning_of_month = Date.civil(year, month, 1)
       state_holiday = Date.civil(year, month, 26)
       state_holiday.downto(beginning_of_month).find {|date| date if date.wday == 1 }
   lee_jackson_day:
     # Friday before Martin Luther King, Jr. Day
     arguments: year, month
-    source: |
+    ruby: |
       day_of_holiday = Holidays::Factory::DateCalculator.day_of_month_calculator.call(year, month, 3, 1)
       beginning_of_month = Date.civil(year, month, 1)
       king_day = Date.civil(year, month, day_of_holiday)
@@ -362,16 +363,16 @@ methods:
   election_day:
     # Tuesday after the first Monday of November
     arguments: year
-    source: |
+    ruby: |
        Holidays::Factory::DateCalculator.day_of_month_calculator.call(year, 11, 1, 1) + 1
   us_inauguration_day:
     # January 20, every fourth year, following Presidential election
     arguments: year
-    source: |
+    ruby: |
       year % 4 == 1 ? 20 : nil
   day_after_thanksgiving:
     arguments: year
-    source: |
+    ruby: |
       Holidays::Factory::DateCalculator.day_of_month_calculator.call(year, 11, 4, 4) + 1
 
 tests:
@@ -498,11 +499,6 @@ tests:
       regions: ["us"]
     expect:
       holiday: false
-  - given:
-      date: ['2017-3-6', '2018-3-5', '2019-3-4']
-      regions: ["us_il"]
-    expect:
-      name: "Casimir Pulaski Day"
 
   - given:
       date: ['2017-3-7', '2018-3-6', '2019-3-5']
@@ -569,7 +565,7 @@ tests:
       name: "Emancipation Day"
   - given:
       date: ['2017-4-16']
-      regions: ["us_dc", "us_ca"]
+      regions: ["us_dc"]
     expect:
       name: "Emancipation Day"
 
@@ -695,6 +691,18 @@ tests:
     expect:
       name: "King Kamehameha I Day"
   - given:
+      date: ['2021-06-19']
+      regions: ["us"]
+      options: ["observed"]
+    expect:
+      holiday: false
+  - given:
+      date: ['2021-06-18']
+      regions: ["us"]
+      options: ["observed"]
+    expect:
+      name: "Juneteenth National Independence Day"
+  - given:
       date: ['2017-6-19']
       regions: ["us_tx"]
     expect:
@@ -732,9 +740,8 @@ tests:
   - given:
       date: ['2020-7-3', '2021-7-5', '2026-7-3']
       regions: ["us"]
-      options: ["observed"]
     expect:
-      name: "Independence Day"
+      holiday: false
   - given:
       date: ['2020-7-3', '2021-7-5', '2026-7-3']
       regions: ["us_va"]
@@ -863,7 +870,7 @@ tests:
       holiday: false
   - given:
       date: ['2017-11-7', '2018-11-6', '2021-11-2']
-      regions: ["us_de", "us_hi", "us_il", "us_in", "us_mt", "us_nj", "us_ny", "us_pa", "us_ri"]
+      regions: ["us_de", "us_hi", "us_in", "us_mt", "us_nj", "us_ny", "us_pa", "us_ri"]
     expect:
       name: "Election Day"
   - given:

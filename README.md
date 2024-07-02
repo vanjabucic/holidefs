@@ -17,9 +17,16 @@ of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:holidefs, "~> 0.4"}
+    {:holidefs, git: "https://github.com/vanjabucic/holidefs.git"}
   ]
 end
+```
+
+## Configuration
+
+```elixir
+# Limit the holiday definitions to US
+config :holidefs, locales: [:us]
 ```
 
 ## Usage
@@ -28,7 +35,7 @@ To get holidays from you country you can use the functions on
 `Holidefs` module, like this:
 
 ```elixir
-Holidefs.between(:br, ~D[2018-03-01], ~D[2018-04-01])
+Holidefs.between(:us, ~D[2018-03-01], ~D[2018-04-01])
 # => {:ok, [%Holidefs.Holiday{name: "Good Friday", ...}, ...]}
 ```
 
@@ -39,8 +46,24 @@ Also, for all these functions you can give a list of options like
 this:
 
 ```elixir
-Holidefs.between(:br, ~D[2018-02-01], ~D[2018-04-03], include_informal?: true)
-# => {:ok, [%Holidefs.Holiday{name: "Good Friday", ...}, ...]}
+{:ok, holidays} = Holidefs.between(:us, ~D[2024-01-01], ~D[2025-01-01], include_informal?: true, observed?: true)
+```
+
+Or, example for Nerck holidays
+
+```elixir
+defmodule NercHolidays do
+  @nerc_holidays ["New Year's Day", "Memorial Day", "Independence Day", "Labor Day", "Thanksgiving", "Christmas Day"]
+
+  def example(year) do
+    {:ok, holidays} = Holidefs.between(:us, year, include_informal?: true, observed?: true)
+
+    holidays
+    |> Enum.filter(&(&1.name in @nerc_holidays))
+    # |> Enum.map(& &1.observed_date)
+    # |> Enum.map(&Date.to_gregorian_days(&1))
+  end
+end
 ```
 
 For the complete list of options and their meaning check
